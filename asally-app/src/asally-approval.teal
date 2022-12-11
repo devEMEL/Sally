@@ -1,0 +1,100 @@
+#pragma version 5
+txn ApplicationID
+int 0
+==
+bnz main_l13
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l12
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l11
+txn OnCompletion
+int NoOp
+==
+bnz main_l5
+err
+main_l5:
+txna ApplicationArgs 0
+byte "create_ASA"
+==
+bnz main_l10
+txna ApplicationArgs 0
+byte "send_ASA"
+==
+bnz main_l8
+err
+main_l8:
+txna Accounts 1
+txna Assets 0
+asset_holding_get AssetBalance
+store 1
+store 0
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 TypeEnum
+int appl
+==
+&&
+txn GroupIndex
+int 0
+==
+&&
+global GroupSize
+int 2
+==
+&&
+gtxn 1 AssetAmount
+int 0
+>
+&&
+load 1
+&&
+assert
+int 1
+return
+int 0
+return
+main_l10:
+gtxn 0 RekeyTo
+global ZeroAddress
+==
+gtxn 1 RekeyTo
+global ZeroAddress
+==
+&&
+gtxn 0 TypeEnum
+int appl
+==
+&&
+txn GroupIndex
+int 0
+==
+&&
+global GroupSize
+int 2
+==
+&&
+assert
+int 1
+return
+main_l11:
+txn Sender
+global CreatorAddress
+==
+return
+main_l12:
+txn Sender
+global CreatorAddress
+==
+return
+main_l13:
+int 1
+return
