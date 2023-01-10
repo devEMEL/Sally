@@ -9,7 +9,7 @@ import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 
-import {  optin, createASA, sendASA } from './action';
+import { createASA, sendASA } from './action';
 
 // // connect to the algorand node
 const algod = new algosdk.Algodv2('','https://node.testnet.algoexplorerapi.io', '');
@@ -65,9 +65,7 @@ function App() {
       setName(null);
       setBalance(null);
   };
-  const optinClick = async () => {
-    optin(accountAddress, applicationId)
-  }
+
   const createASAClick = async () => {
     // const globalStateLength = await getGlobalStateLength(applicationId);
     // const localStateLength = await getLocalStateLength(applicationId);
@@ -97,7 +95,6 @@ function App() {
           </Button>
         </Col>
       </Row>
-      <Button onClick={() => optinClick()}>Optin</Button>
         
       <Container>
         <Row>
