@@ -97,7 +97,6 @@ function App() {
           </Button>
         </Col>
       </Row>
-      <Button onClick={() => optinClick()}>Optin</Button>
         
       <Container>
         <Row>
