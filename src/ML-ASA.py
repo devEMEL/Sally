@@ -5,8 +5,14 @@ from pyteal import *
 
 def approval_program():
 
+  count = Bytes("count")
+  local_count = Bytes("local_count")
+
   def handle_creation():
-    return Seq(Approve())
+    return Seq(
+      App.globalPut(count, Int(0)),
+      Approve()
+    )
 
   def handle_updateapp():
     return Return(Txn.sender() == Global.creator_address())
@@ -14,8 +20,17 @@ def approval_program():
   def handle_deleteapp():
     return Return(Txn.sender() == Global.creator_address())
 
+  def convert_uint_to_string(uint):
+    result = '"' + str(uint) + '"'
+    return result
+
   def create_ASA():
+    # global_index = Btoi(Txn.application_args[1])
+    # local_index = Btoi(Txn.application_args[2])
+    assetName = Txn.application_args[1]
+
     return Seq(
+      # global_index, local_index, assetName,
       Assert(
         And(
           Gtxn[0].rekey_to() == Global.zero_address(),
@@ -25,6 +40,12 @@ def approval_program():
           Global.group_size() == Int(2)
         )
       ),
+      App.globalPut(Bytes(convert_uint_to_string(count)), assetName),
+      App.globalPut(count, App.globalGet(count) + Int(1) ),
+
+      App.localPut(Txn.sender(), Bytes(convert_uint_to_string(local_count)), assetName),
+      App.localPut(Txn.sender(), local_count, App.localGet(Txn.sender(), local_count) + Int(1)),
+
       Approve()
     )
 
@@ -49,7 +70,10 @@ def approval_program():
       ),
       Approve()
     )
-    
+  handle_optin=Seq([
+    App.localPut(Txn.sender(), local_count, Int(0)),
+    Approve()
+  ])
 
   handle_noop=Seq(
     Cond(
@@ -62,6 +86,7 @@ def approval_program():
 
   program = Cond(
       [Txn.application_id() == Int(0), handle_creation()],
+      [Txn.on_completion() == OnComplete.OptIn, handle_optin],
       [Txn.on_completion() == OnComplete.UpdateApplication, handle_updateapp()],
       [Txn.on_completion() == OnComplete.DeleteApplication, handle_deleteapp()],
       [Txn.on_completion() == OnComplete.NoOp, handle_noop]
